@@ -76,6 +76,13 @@ while True:
     #display.scroll(str(x_tilt) + " " + str(y_tilt))  
     show_ball_at(ball)
         
+    if ball[0] == 2:
+        if ball[1] == 2:
+            sleep(1000)
+            display.show(Image.HAPPY)
+            sleep(2000)
+            display.clear()
+    
 
 
     
