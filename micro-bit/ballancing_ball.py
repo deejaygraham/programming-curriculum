@@ -26,6 +26,8 @@ def tilt_is_down(tilt):
     return tilt < 0
 
 # drawing 
+refresh_in_milliseconds = 50
+
 PIXEL_ON = 9
 PIXEL_OFF = 0
 
@@ -36,10 +38,6 @@ def show_ball_at(point):
     display.set_pixel(point[0], point[1], PIXEL_ON)
     
 display.clear()
-
-
-
-refresh_in_milliseconds = 50
 
 # start in centre
 ball = [ 2, 2 ]
@@ -76,12 +74,11 @@ while True:
     #display.scroll(str(x_tilt) + " " + str(y_tilt))  
     show_ball_at(ball)
         
-    if ball[0] == 2:
-        if ball[1] == 2:
-            sleep(1000)
-            display.show(Image.HAPPY)
-            sleep(2000)
-            display.clear()
+    if ball[0] == 2 and ball[1] == 2:
+        sleep(1000)
+        display.show(Image.HAPPY)
+        sleep(2000)
+        display.clear()
     
 
 
