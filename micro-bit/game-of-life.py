@@ -18,10 +18,76 @@ random_population_pc = 50
 dead_cell = 0
 live_cell = 9
 
+def is_legal_location(x, y):
+    return 0 <= x < width && 0 <= y < height
+
+# ugly but works with microbit
+def count_live_neighbours(x, y, population):
+    live_neighbours = 0
+    # to the left...
+    if is_legal_location(x - 1, y - 1, population):
+        if population[x - 1][y - 1] == live_cell:
+            live_neighbours += 1
+
+    if is_legal_location(x - 1, y, population):
+        if population[x - 1][y] == live_cell:
+            live_neighbours += 1
+
+    if is_legal_location(x - 1, y + 1, population):
+        if population[x - 1][y + 1] == live_cell:
+            live_neighbours += 1
+
+    # above
+    if is_legal_location(x, y - 1, population):
+        if population[x][y - 1] == live_cell:
+            live_neighbours += 1
+
+    # below
+    if is_legal_location(x, y + 1, population):
+        if population[x][y + 1] == live_cell:
+            live_neighbours += 1
+
+    # to the right...
+    if is_legal_location(x + 1, y - 1, population):
+        if population[x + 1][y - 1] == live_cell:
+            live_neighbours += 1
+
+    if is_legal_location(x + 1, y, population):
+        if population[x + 1][y] == live_cell:
+            live_neighbours += 1
+
+    if is_legal_location(x + 1, y + 1, population):
+        if population[x + 1][y + 1] == live_cell:
+            live_neighbours += 1
+
+    return live_neighbours
+
 # run through the survivors, births and deaths
 def regenerate_population(population):
     # nothing yet...
-    return population
+    next_generation = empty_population()
+
+    for x in range(0, width):
+        for y in range(0, height):
+            live_neighbours = count_live_neighbours(x, y, population)
+            # Any live cell...
+            if population[x][y] == live_cell:
+                # ... with fewer than two live neighbours dies, as if caused by under-population.
+                if live_neighbours < 2:
+                    next_generation[x][y] = dead_cell
+                # ... with two or three live neighbours lives on to the next generation.
+                if live_neighbours in [2, 3]:
+                    next_generation[x][y] = live_cell
+                # ... with more than three live neighbours dies, as if by over-population.
+                if live_neighbours > 3:
+                    next_generation[x][y] = dead_cell
+            # Any dead cell...
+            if population[x][y] == dead_cell:
+                # ... with exactly three live neighbours becomes a live cell, as if by reproduction.
+                if live_neighbours == 3:
+                    next_generation[x][y] = live_cell
+
+    return next_generation
 
 # empty initialisation
 def empty_population():
@@ -114,8 +180,8 @@ while True:
     if regenerate_population:
         living_cells = regenerate_population(living_cells)
 
-    # display.scroll("history = " + str(len(history)))
     # history = accelerometer.get_gestures()
+    # display.scroll("history = " + str(len(history)))
     #
     # if len(history) > 1:
     #     display.scroll("history = " + str(len(history)))
