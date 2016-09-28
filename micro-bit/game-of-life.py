@@ -15,56 +15,56 @@ width, height = 5, 5
 random_population_pc = 50
 
 # cell states
-dead_cell = 0
-live_cell = 9
+dead_cell = 0 # debug set to 2 to see all dimly lit.
+live_cell = 8
 
+# is this x, y location on the board?
 def is_legal_location(x, y):
-    return 0 <= x < width && 0 <= y < height
+    return (0 <= x < width) and (0 <= y < height)
 
 # ugly but works with microbit
 def count_live_neighbours(x, y, population):
     live_neighbours = 0
     # to the left...
-    if is_legal_location(x - 1, y - 1, population):
+    if is_legal_location(x - 1, y - 1):
         if population[x - 1][y - 1] == live_cell:
             live_neighbours += 1
 
-    if is_legal_location(x - 1, y, population):
+    if is_legal_location(x - 1, y):
         if population[x - 1][y] == live_cell:
             live_neighbours += 1
 
-    if is_legal_location(x - 1, y + 1, population):
+    if is_legal_location(x - 1, y + 1):
         if population[x - 1][y + 1] == live_cell:
             live_neighbours += 1
 
     # above
-    if is_legal_location(x, y - 1, population):
+    if is_legal_location(x, y - 1):
         if population[x][y - 1] == live_cell:
             live_neighbours += 1
 
     # below
-    if is_legal_location(x, y + 1, population):
+    if is_legal_location(x, y + 1):
         if population[x][y + 1] == live_cell:
             live_neighbours += 1
 
     # to the right...
-    if is_legal_location(x + 1, y - 1, population):
+    if is_legal_location(x + 1, y - 1):
         if population[x + 1][y - 1] == live_cell:
             live_neighbours += 1
 
-    if is_legal_location(x + 1, y, population):
+    if is_legal_location(x + 1, y):
         if population[x + 1][y] == live_cell:
             live_neighbours += 1
 
-    if is_legal_location(x + 1, y + 1, population):
+    if is_legal_location(x + 1, y + 1):
         if population[x + 1][y + 1] == live_cell:
             live_neighbours += 1
 
     return live_neighbours
 
 # run through the survivors, births and deaths
-def regenerate_population(population):
-    # nothing yet...
+def create_next_generation(population):
     next_generation = empty_population()
 
     for x in range(0, width):
@@ -118,38 +118,58 @@ def random_population():
                 population[x][y] = dead_cell
     return population
 
+# are all locations dead?
+def is_extinct(population):
+    living = 0
+    for x in range(0, width):
+        for y in range(0, height):
+            if population[x][y] == live_cell:
+                living += 1
+    return (living == 0)
+    
 def display_population(population):
 #    display.clear()
     for x in range(0, width):
         for y in range(0, height):
             display.set_pixel(x, y, population[x][y])
 
+def show_patronus():
+    animals = [
+        Image.DUCK,
+        Image.RABBIT,
+        Image.COW,
+        Image.PACMAN,
+        Image.TORTOISE,
+        Image.BUTTERFLY,
+        Image.GIRAFFE,
+        Image.SNAKE
+        ]
+
+    display.show(random.choice(animals))
+
 # Game start...
 #display.scroll("Game of Life")
 
-# Show an animal at the start
-animals = [
-    Image.DUCK,
-    Image.RABBIT,
-    Image.COW,
-    Image.PACMAN,
-    Image.TORTOISE,
-    Image.BUTTERFLY,
-    Image.GIRAFFE,
-    Image.SNAKE
-    ]
-
-display.show(random.choice(animals))
-sleep(refresh_rate_in_ms)
+show_patronus()
+sleep(2 * refresh_rate_in_ms)
 display.clear()
 
 reset_population = True
 regenerate_population = True
 
+living_cells = random_population()
+
 # Game loop
 while True:
 
-    display_population(living_cells)
+    if is_extinct(living_cells):
+        display.clear()
+        display.show(Image.SAD)
+        sleep(refresh_rate_in_ms)
+        reset_population = True
+    else:
+        display_population(living_cells)
+
     sleep(refresh_rate_in_ms)
 
     # Reset the population by shaking !!!
@@ -157,39 +177,14 @@ while True:
     # button a should be used to toggle single step mode
 
     if button_a.was_pressed():
-        #display.scroll("resetting")
         reset_population = True
-
-    # button b will single step
-    # single step through the next
-    # if button_b.was_pressed():
-    #
-    #      display.show(Image.NO)
-    #      sleep(refresh_rate_in_ms)
-
-    # if button_a.was_pressed():
-    #     Image.show(Image.YES)
-    #     sleep(refresh_rate_in_ms)
-    #     reset_population = True
 
     if reset_population:
         living_cells = random_population()
         reset_population = False
+        display.clear()
 
     # regenerate a new population
     if regenerate_population:
-        living_cells = regenerate_population(living_cells)
+        living_cells = create_next_generation(living_cells)
 
-    # history = accelerometer.get_gestures()
-    # display.scroll("history = " + str(len(history)))
-    #
-    # if len(history) > 1:
-    #     display.scroll("history = " + str(len(history)))
-    #
-    #     if history[-1] == 'shake':
-    #         display.show(Image.CONFUSED)
-    #         sleep(refresh_rate_in_ms)
-    #         reset_population = True
-    #     else:
-    #         display.scroll(history[-1])
-    #         sleep(5000)
